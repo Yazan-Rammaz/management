@@ -1,0 +1,14 @@
+import "server-only";
+import { api } from "@/lib/api/server";
+import { {{camelCase name}}Schema, type {{pascalCase name}} } from "./schema";
+
+/** Single place {{kebabCase name}} endpoints are called. Server-only. */
+export async function list{{pascalCase name}}s(): Promise<{{pascalCase name}}[]> {
+  const data = await api.get<unknown>("/{{kebabCase name}}s");
+  return {{camelCase name}}Schema.array().parse(data);
+}
+
+export async function get{{pascalCase name}}(id: string): Promise<{{pascalCase name}}> {
+  const data = await api.get<unknown>(`/{{kebabCase name}}s/${id}`);
+  return {{camelCase name}}Schema.parse(data);
+}

@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   RDB Management — Design System
+   -----------------------------------------------------------------------------
+   THE ONE SCALING RULE (read this before adding any size):
+
+   The root font-size is driven by the viewport so that EVERY rem-based value
+   shrinks/grows together — identical shape at every screen size ("the sample").
+
+   Because `--spacing` below is set to 0.0625rem (= 1px at the 16px base), every
+   Tailwind size/spacing utility is expressed in *XD pixels that auto-scale*:
+
+       XD says 300 x 60  ->  className="w-300 h-60"
+       XD says padding 24 ->  className="p-24"
+       XD says font 18    ->  className="fz-18"     (custom utility, see below)
+       XD says radius 12  ->  className="rad-12"     (custom utility, see below)
+
+   NEVER write raw px in a className (`w-[300px]`). Raw px does NOT scale and is
+   banned by lint. Always use the unit-less number = the XD pixel value.
+
+   Three design canvases (reference widths from XD), each scales 1:1 with the
+   viewport inside its band, caps at the reference (adds side whitespace above
+   it), and the mobile canvas LOCKS at 400px (becomes horizontally scrollable
+   below that — intentionally "unresponsive", per spec).
+   ========================================================================== */
+
+/* --- Root scaling engine: font-size per canvas -------------------------------
+   divisor = referenceWidth / 16. clamp(floor, 100vw/divisor, 16px):
+     - preferred 100vw/divisor  -> 16px exactly at the reference width
+     - max 16px                 -> above reference, size is fixed -> side whitespace
+     - min floor                -> the bottom of the band / hard lock
+--------------------------------------------------------------------------- */
+
+/* Mobile canvas — reference 430px, HARD LOCK at 400px */
+html {
+  font-size: clamp(14.88px, calc(100vw / 26.875), 16px);
+}
+
+/* Tablet canvas — reference 834px (iPad portrait) */
+@media (min-width: 600px) {
+  html {
+    font-size: clamp(11.5px, calc(100vw / 52.125), 16px);
+  }
+}
+
+/* Laptop canvas — reference 1366px */
+@media (min-width: 1024px) {
+  html {
+    font-size: clamp(12px, calc(100vw / 85.375), 16px);
+  }
+}
+
+/* Hard floor for the mobile lock: 26.875rem == 400px at the locked 14.88px.
+   Below 400px the viewport scrolls horizontally instead of distorting. */
+body {
+  min-width: 26.875rem;
+}
+
+/* =============================================================================
+   Design tokens
+   ========================================================================== */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  /* 1 spacing unit = 1px at the 16px base. This is what makes `w-300` == 300px
+     at the reference width while still scaling with the root font-size. */
+  --spacing: 0.0625rem;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-app-sans);
+}
+
+/* Font size in XD pixels: `fz-18` -> 18px@reference, auto-scaling. */
+@utility fz-* {
+  font-size: calc(--value(integer) * 0.0625rem);
+}
+
+/* Border radius in XD pixels: `rad-12` -> 12px@reference, auto-scaling. */
+@utility rad-* {
+  border-radius: calc(--value(integer) * 0.0625rem);
+}
+
+/* =============================================================================
+   Base element styles
+   ========================================================================== */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Honor the OS "reduce motion" preference everywhere (iOS-style animations off). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

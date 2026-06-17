@@ -1,0 +1,2 @@
+# Copy to .dev.vars and fill in. Documents required env for local dev.
+NEST_API_URL="http://localhost:3001"

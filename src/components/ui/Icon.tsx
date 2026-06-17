@@ -1,0 +1,68 @@
+import { cn } from "@/lib/utils/cn";
+
+type IconProps = {
+  /** File name (without extension) in /public/icons, e.g. "user" -> /icons/user.svg */
+  name: string;
+  /** Size in XD pixels (scales with the canvas). */
+  size?: number;
+  className?: string;
+  /** Accessible label; leave empty for decorative icons. */
+  alt?: string;
+  /**
+   * mask=true recolors a monochrome icon with the current text color
+   * (`text-foreground`, `text-red-500`, …). Use for single-color UI glyphs.
+   * mask=false renders the icon as-is (multicolor brand/illustration icons).
+   */
+  mask?: boolean;
+};
+
+/**
+ * The ONLY way to render an icon. XD exports icons as .svg files into
+ * /public/icons; this component renders them WITHOUT inlining any <svg> into the
+ * page markup (per spec: no svg in pages). Always `<Icon name="…" />`.
+ */
+export function Icon({
+  name,
+  size = 24,
+  className,
+  alt = "",
+  mask = false,
+}: IconProps) {
+  const src = `/icons/${name}.svg`;
+  const dimension = `${size * 0.0625}rem`;
+  const style = { width: dimension, height: dimension } as const;
+
+  if (mask) {
+    return (
+      <span
+        aria-hidden
+        className={cn("inline-block bg-current", className)}
+        style={{
+          ...style,
+          WebkitMaskImage: `url(${src})`,
+          maskImage: `url(${src})`,
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+        }}
+      />
+    );
+  }
+
+  return (
+    // Intentionally a plain <img>: next/image should not optimize svg, and these
+    // are tiny static assets. eslint-disable kept local to this single sanctioned spot.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      aria-hidden={alt === ""}
+      draggable={false}
+      className={cn("inline-block select-none", className)}
+      style={style}
+    />
+  );
+}

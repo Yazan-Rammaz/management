@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rdb-management",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "NODE_ENV": "production"
+  }
+  // Secrets (NEST_API_URL, etc.) are set per-environment, NOT here:
+  //   npx wrangler secret put NEST_API_URL
+  // For local dev they live in .dev.vars (git-ignored).
+}
