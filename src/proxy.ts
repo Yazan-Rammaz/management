@@ -142,7 +142,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-    // Run on everything except static assets & image optimizer.
     matcher: ['/((?!_next/static|_next/image|favicon.ico|icons/|.*\\.\\w+$).*)'],
 };
-export const runtime = 'edge';
