@@ -3,8 +3,11 @@ import { cn } from "@/lib/utils/cn";
 type IconProps = {
   /** File name (without extension) in /public/icons, e.g. "user" -> /icons/user.svg */
   name: string;
-  /** Size in XD pixels (scales with the canvas). */
+  /** Square size in XD pixels (scales with the canvas). Ignored if width/height set. */
   size?: number;
+  /** Non-square XD pixel dimensions (brand/illustration assets). Override `size`. */
+  width?: number;
+  height?: number;
   className?: string;
   /** Accessible label; leave empty for decorative icons. */
   alt?: string;
@@ -24,13 +27,18 @@ type IconProps = {
 export function Icon({
   name,
   size = 24,
+  width,
+  height,
   className,
   alt = "",
   mask = false,
 }: IconProps) {
   const src = `/icons/${name}.svg`;
-  const dimension = `${size * 0.0625}rem`;
-  const style = { width: dimension, height: dimension } as const;
+  // XD px -> scaling rem. width/height win over the square `size`.
+  const style = {
+    width: `${(width ?? size) * 0.0625}rem`,
+    height: `${(height ?? size) * 0.0625}rem`,
+  } as const;
 
   if (mask) {
     return (

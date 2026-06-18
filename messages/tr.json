@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "Yönetimi",
+    "language": "Dil",
+    "logout": "Çıkış yap"
+  },
+  "forbidden": {
+    "title": "403 — İzin yok",
+    "message": "Rolünüzün bu sayfaya erişimi yok.",
+    "backToDashboard": "Panoya dön"
+  },
+  "roles": {
+    "super_admin": "Süper Yönetici",
+    "country_manager": "Ülke Yöneticisi",
+    "agent": "Temsilci"
+  }
+}

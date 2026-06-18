@@ -1,13 +1,27 @@
 import type { ReactNode } from "react";
-import { Screen } from "@/components/ui/Screen";
+import { Icon } from "@/components/ui/Icon";
 
-/** Auth pages sit in a narrow (430px design) centered column. */
+/**
+ * Auth shell — full-bleed, with the rdb brand mark pinned top-start. Individual
+ * auth screens own their vertical layout (and the reserved on-screen-keyboard
+ * space at the bottom).
+ *
+ * NOTE: the top-start mark size/inset is an assumption pending XD values.
+ */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <Screen variant="centered" maxW={430} gutter={24}>
-      <div className="flex min-h-screen flex-col justify-center gap-32 py-64">
-        {children}
+    <div className="relative h-screen overflow-hidden">
+      <div className="absolute top-30 start-30 flex flex-col gap-4">
+        <Icon
+          name="auth/rdb"
+          width={72}
+          height={52}
+          alt="Ramaaz Digital Banking"
+        />
+        <span className="fz-12 text-ink font-bold">Management</span>
       </div>
-    </Screen>
+
+      {children}
+    </div>
   );
 }

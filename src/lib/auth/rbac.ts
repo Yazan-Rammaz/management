@@ -22,9 +22,5 @@ export function hasRole(role: Role | null | undefined, allowed: Role[]) {
   return !!role && allowed.includes(role);
 }
 
-/** Human-friendly labels (extend with i18n later). */
-export const ROLE_LABEL: Record<Role, string> = {
-  super_admin: "Super Admin",
-  country_manager: "Country Manager",
-  agent: "Agent",
-};
+// Human-friendly role labels are i18n strings — see the `roles` namespace in
+// messages/*.json, read via `useTranslations("roles")` / `getTranslations`.

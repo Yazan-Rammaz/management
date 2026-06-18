@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { api, ApiError } from "@/lib/api/server";
 import { hasRole, type Role } from "@/lib/auth/rbac";
+import { readFakeSession } from "@/lib/auth/fake-session";
 
 export type SessionUser = {
   id: string;
@@ -14,17 +15,25 @@ export type SessionUser = {
 };
 
 /**
- * The authoritative session, fetched from NestJS `/auth/me`. `cache()` dedupes
- * it across a single render pass. Returns null when unauthenticated.
+ * The authoritative session. `cache()` dedupes it across a single render pass.
+ * Returns null when unauthenticated.
+ *
+ * TEMP: a fake cookie-based session (set by the login flow) takes precedence
+ * until NestJS `/auth/me` is wired. When the backend exists, remove the fake
+ * branch and restore `throw error` for unexpected failures.
  */
 export const getSession = cache(async (): Promise<SessionUser | null> => {
+  const fake = await readFakeSession();
+  if (fake) return fake;
+
   try {
     return await api.get<SessionUser>("/auth/me");
   } catch (error) {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
       return null;
     }
-    throw error;
+    // No backend yet → treat any other failure as unauthenticated for now.
+    return null;
   }
 });
 

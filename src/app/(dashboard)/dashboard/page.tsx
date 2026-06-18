@@ -1,24 +1,18 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/auth/session";
-import { hasRole } from "@/lib/auth/rbac";
 
+/**
+ * PLACEHOLDER — build the real dashboard from XD here.
+ *
+ * Kept as a route because `loginAction` redirects to /dashboard. The protected
+ * (dashboard) layout already runs the authoritative `requireSession()` gate;
+ * the call below makes the user available for this page.
+ */
 export default async function DashboardPage() {
-  const user = await requireSession();
-  const canManageAgents = hasRole(user.role, ["super_admin", "country_manager"]);
+  await requireSession();
 
   return (
     <div className="flex flex-col gap-20">
-      <h1 className="fz-24 font-semibold">Welcome, {user.name}</h1>
-      <p className="fz-16 opacity-70">
-        You are signed in as {user.role}
-        {user.countryCode ? ` (${user.countryCode})` : ""}.
-      </p>
-
-      {canManageAgents ? (
-        <Link href="/agents" className="fz-16 underline">
-          Manage agents →
-        </Link>
-      ) : null}
+      {/* TODO: build dashboard from XD */}
     </div>
   );
 }

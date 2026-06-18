@@ -4,7 +4,16 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { api, ApiError } from "@/lib/api/server";
 import { setAuthCookies, clearAuthCookies } from "@/lib/auth/cookies";
+import { writeFakeSession, clearFakeSession } from "@/lib/auth/fake-session";
 import { loginSchema, registerSchema } from "./schema";
+
+/**
+ * TEMP: the login flow calls this on completion to store a fake session cookie
+ * (read by `getSession`). Replace with the real NestJS auth result later.
+ */
+export async function establishFakeSession() {
+  await writeFakeSession();
+}
 
 /**
  * Server Actions are THE one way the browser triggers a mutation. Client forms
@@ -86,5 +95,7 @@ export async function logoutAction() {
     // best-effort server-side revoke; clear local cookies regardless
   }
   await clearAuthCookies();
-  redirect("/login");
+  await clearFakeSession();
+  // Through the splash → it re-checks (now unauthenticated) and lands on /login.
+  redirect("/");
 }

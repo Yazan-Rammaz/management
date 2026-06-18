@@ -35,6 +35,16 @@ The root `font-size` is driven by the viewport (`src/app/globals.css`), so every
 - Every page renders inside exactly one `<Screen variant="centered" | "bleed">`.
   `centered` (forms/text) gets a max-width column; `bleed` (dashboards) is full.
 
+**Project-wide design tokens (XD):**
+- Font: **Quicksand** (`--font-app-sans`, loaded in `layout.tsx`; Arabic falls
+  back to system sans). Use `fz-*` for size; `font-normal/medium/semibold/bold`.
+- Colors: `bg-primary`/`text-primary` = `#3066CC` (action blue); `border-line` =
+  `#707070` (hairline); `text-foreground` `#171717`; `text-black` `#000`.
+- Borders: **every border is 0.5px** (set globally in `globals.css`; hairlines
+  intentionally don't scale). Just use `border` / `border-b` etc.
+- Non-square brand/illustration assets: `<Icon name="…" width={W} height={H} />`
+  (XD px). Square glyphs still use `size`.
+
 ## 2. Talking to the API — BFF only
 
 - The browser **never** calls NestJS and **never** holds a token.
@@ -94,12 +104,49 @@ Cloudflare **Workers Builds** is connected to the git repo → push to `main`
 auto-builds (`opennextjs-cloudflare build`) and deploys. Secrets (`NEST_API_URL`)
 are Cloudflare secrets; local dev uses `.dev.vars` (git-ignored).
 
-## 9. Session pickup — where we left off (as of 2026-06-17)
+## 9. Internationalization (i18n) & text direction
+
+Three languages, **one way**: `next-intl` with a **cookie-based** locale (no
+`/en` URL prefix). Supported locales live in **one place**: `src/lib/i18n/config.ts`.
+
+- **Languages:** `en` (default), `ar`, `tr`. To add one: add the code to
+  `locales` in `config.ts` **and** add `messages/<code>.json`. Nothing else.
+- **Direction is automatic.** `localeDirection()` in `config.ts` is the ONLY
+  place LTR/RTL is decided (`ar` → rtl). It is applied **once** on `<html dir>`
+  in `src/app/layout.tsx`. **Never** set `dir` on individual elements or branch
+  on language in a component.
+- **Author direction-agnostic UI.** Use **logical** Tailwind utilities so
+  layouts mirror themselves:
+  - spacing/position: `ps-`/`pe-`, `ms-`/`me-`, `start-`/`end-` — never
+    `pl/pr`, `ml/mr`, `left/right`.
+  - alignment: `text-start`/`text-end` (not `text-left/right`); for flex rows,
+    `justify-start`/`justify-end` already follow `dir`.
+  - prefer `gap-*` over directional margins between siblings.
+  - (`px-*`/`mx-*` are symmetric, so they're fine.)
+- **No hardcoded UI strings.** Every user-facing string is a key in
+  `messages/*.json`. `en.json` is the canonical key set (type-checked via
+  `global.d.ts`); keep `ar.json`/`tr.json` structurally identical.
+  - Server Components / layouts: `const t = await getTranslations("ns")`.
+  - Client Components: `const t = useTranslations("ns")`.
+  - Interpolation/plurals use ICU: `t("dashboard.welcome", { name })`.
+- **Switching language:** `<LocaleSwitcher>` (`components/ui`) → `setLocale()`
+  Server Action (`src/lib/i18n/locale.ts`) sets the `rdb_lang` cookie, then
+  `router.refresh()`. The page re-renders with new messages and `<html dir>`
+  flips. First-visit language is auto-detected from `Accept-Language` in
+  `src/proxy.ts`, then remembered in the cookie.
+  - **The switcher lives ONLY on the Settings page** — never in headers,
+    layouts, or other screens.
+
+## 10. Session pickup — where we left off (as of 2026-06-17)
 
 The scaffold is complete and verified: `tsc`, `eslint`, `vitest` (7 tests) and
 `next build` all pass. Initial commit is on `main`. Remote `origin` is set to
 `https://github.com/Yazan-Rammaz/managament.git` but **nothing is pushed yet**
 (by the owner's request).
+
+**i18n is wired** (see §9): `next-intl`, cookie-based `en`/`ar`/`tr`, auto
+direction, dev port is `3006`. All existing screens are translated. New screens
+must follow §9 — no hardcoded strings, logical Tailwind utilities only.
 
 Open items, in priority order:
 

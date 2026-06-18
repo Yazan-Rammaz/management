@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "Management",
+    "language": "Language",
+    "logout": "Logout"
+  },
+  "forbidden": {
+    "title": "403 — Not allowed",
+    "message": "Your role doesn’t have access to this page.",
+    "backToDashboard": "Back to dashboard"
+  },
+  "roles": {
+    "super_admin": "Super Admin",
+    "country_manager": "Country Manager",
+    "agent": "Agent"
+  }
+}

@@ -35,6 +35,9 @@
 /* Mobile canvas — reference 430px, HARD LOCK at 400px */
 html {
   font-size: clamp(14.88px, calc(100vw / 26.875), 16px);
+  /* App shell: the document itself never scrolls. Screens are full-viewport;
+     any scrollable page must use an internal overflow-auto region. */
+  overflow: hidden;
 }
 
 /* Tablet canvas — reference 834px (iPad portrait) */
@@ -73,7 +76,108 @@ body {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  /* Brand palette (from XD). `primary` = action blue; `line` = hairline border;
+     `ink` = primary text; `muted` = placeholder/disabled text. */
+  --color-primary: #3066cc;
+  --color-line: #707070;
+  --color-ink: #1d1d1d;
+  --color-muted: #c3c3c3;
+
   --font-sans: var(--font-app-sans);
+}
+
+/* =============================================================================
+   Hairline borders — true ~0.5px on EVERY display ("all borders 0.5").
+   A CSS border can't go below 1 *physical* pixel, so on 1x screens `0.5px`
+   rounds up to 1px. Instead we draw a 1px border on a pseudo-element sized 200%
+   and scaled to 0.5 → a crisp half-pixel line at any DPR. This is the project's
+   ONE way to draw a border (don't use Tailwind `border` for visible borders).
+
+   Usage:
+     - single edge:  class="hairline-b" (or -t / -s / -e)
+     - full box:     class="hairline"  + (for rounded) style --hairline-radius
+     - color:        style --hairline-color (defaults to --color-line #707070)
+   ========================================================================== */
+.hairline,
+.hairline-t,
+.hairline-b,
+.hairline-s,
+.hairline-e {
+  position: relative;
+}
+.hairline::after,
+.hairline-t::after,
+.hairline-b::after,
+.hairline-s::after,
+.hairline-e::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+/* Full (optionally rounded) box. Style defaults to solid; set --hairline-style
+   to "dashed" for dashed outlines (e.g. inputs). */
+.hairline::after {
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  border-width: 1px;
+  border-style: var(--hairline-style, solid);
+  border-color: var(--hairline-color, var(--color-line));
+  border-radius: calc(var(--hairline-radius, 0px) * 2);
+  transform: scale(0.5);
+  transform-origin: top left;
+}
+/* Single edges (scale only the relevant axis). */
+.hairline-t::after,
+.hairline-b::after {
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline-color, var(--color-line));
+}
+.hairline-t::after {
+  top: 0;
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+.hairline-b::after {
+  bottom: 0;
+  transform: scaleY(0.5);
+  transform-origin: bottom;
+}
+.hairline-s::after,
+.hairline-e::after {
+  inset-block: 0;
+  width: 1px;
+  background: var(--hairline-color, var(--color-line));
+}
+.hairline-s::after {
+  inset-inline-start: 0;
+  transform: scaleX(0.5);
+  transform-origin: left;
+}
+.hairline-e::after {
+  inset-inline-end: 0;
+  transform: scaleX(0.5);
+  transform-origin: right;
+}
+
+/* Blinking underscore caret for the private-code field. Overlaid at the caret
+   position (absolute, so it never pushes content); the input's own caret is
+   hidden with `caret-transparent`. */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.caret-blink {
+  animation: caret-blink 1.06s steps(1, end) infinite;
 }
 
 /* Font size in XD pixels: `fz-18` -> 18px@reference, auto-scaling. */

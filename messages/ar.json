@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "إدارة",
+    "language": "اللغة",
+    "logout": "تسجيل الخروج"
+  },
+  "forbidden": {
+    "title": "٤٠٣ — غير مسموح",
+    "message": "صلاحيتك لا تتيح الوصول إلى هذه الصفحة.",
+    "backToDashboard": "العودة إلى لوحة التحكم"
+  },
+  "roles": {
+    "super_admin": "مدير عام",
+    "country_manager": "مدير دولة",
+    "agent": "وكيل"
+  }
+}

@@ -1,4 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+  matchLocale,
+} from "@/lib/i18n/config";
 
 /**
  * Edge proxy (Next 16's renamed "middleware"). Two jobs, run on every request:
@@ -17,13 +22,20 @@ const ACCESS = "rdb_at";
 const REFRESH = "rdb_rt";
 
 function buildCsp(nonce: string) {
+  const dev = process.env.NODE_ENV !== "production";
+  // React/Next dev mode uses eval() for Fast Refresh & callstack rebuilding,
+  // and a websocket for HMR. Both are dev-only; production stays strict.
+  const scriptSrc = dev
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+  const connectSrc = dev ? `connect-src 'self' ws:` : `connect-src 'self'`;
   const directives = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    scriptSrc,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: blob:`,
     `font-src 'self'`,
-    `connect-src 'self'`,
+    connectSrc,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
@@ -82,7 +94,32 @@ export async function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-nonce", nonce);
 
+  // First-visit language auto-detection: if no language cookie yet, pick the
+  // best match from Accept-Language (falls back to the default locale). We patch
+  // the FORWARDED request cookie header before NextResponse.next reads it, so
+  // next-intl resolves the right messages on this very render; the matching
+  // response cookie (set below) makes it stick. Afterwards the cookie is
+  // authoritative and the <LocaleSwitcher> overwrites it.
+  const detectedLocale = req.cookies.has(LOCALE_COOKIE)
+    ? null
+    : matchLocale(req.headers.get("accept-language"));
+  if (detectedLocale) {
+    const cookieHeader = requestHeaders.get("cookie");
+    requestHeaders.set(
+      "cookie",
+      `${cookieHeader ? `${cookieHeader}; ` : ""}${LOCALE_COOKIE}=${detectedLocale}`,
+    );
+  }
+
   const res = NextResponse.next({ request: { headers: requestHeaders } });
+
+  if (detectedLocale) {
+    res.cookies.set(LOCALE_COOKIE, detectedLocale, {
+      path: "/",
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+    });
+  }
 
   // Silent refresh when the access cookie has expired but refresh is still good.
   const hasAccess = req.cookies.has(ACCESS);
