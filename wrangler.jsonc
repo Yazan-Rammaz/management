@@ -12,7 +12,8 @@
     "enabled": true
   },
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEST_API_URL": "http://localhost:3001"
   }
   // Secrets (NEST_API_URL, etc.) are set per-environment, NOT here:
   //   npx wrangler secret put NEST_API_URL
