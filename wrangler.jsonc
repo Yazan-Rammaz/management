@@ -13,7 +13,8 @@
     "enabled": true
   },
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEST_API_URL": "https://yourdomain.com"
   }
   // Secrets (NEST_API_URL, etc.) are set per-environment, NOT here:
   //   npx wrangler secret put NEST_API_URL
