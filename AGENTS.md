@@ -64,9 +64,12 @@ sample").
 ## 3. Auth & roles
 
 - httpOnly cookies (`rdb_at`/`rdb_rt`), set only in
-  actions/route-handlers/proxy.
-- `src/proxy.ts` (Next 16 edge proxy) does silent refresh + security headers
-  (CSP/HSTS).
+  actions/route-handlers/middleware.
+- `src/middleware.ts` (edge middleware) does silent refresh + security headers
+  (CSP/HSTS). **It must be `middleware.ts`, not `proxy.ts`:** in Next 16 the
+  `proxy` convention is locked to the Node.js runtime, and OpenNext/Cloudflare
+  only supports an **edge** middleware. The build prints a `proxy`-deprecation
+  warning — that's expected; ignore it.
 - The authoritative gate is `requireSession()` / `requireRole()` in protected
   layouts/pages — they call NestJS `/auth/me`. **Frontend RBAC is for rendering
   only; NestJS enforces every real rule.**
@@ -118,6 +121,14 @@ auto-builds (`opennextjs-cloudflare build`) and deploys. Secrets
 (`NEST_API_URL`) are Cloudflare secrets; local dev uses `.dev.vars`
 (git-ignored).
 
+- **The production build uses webpack, not Turbopack** (`build` =
+  `next build --webpack`). OpenNext/Cloudflare can't load Turbopack's split
+  server chunks at runtime (`ChunkLoadError` → 500 on every route). Local
+  `next dev` still uses Turbopack. Don't drop the `--webpack` flag.
+- The worker is named **`management`** (`wrangler.jsonc`); URL
+  `https://management.yazan-adnof.workers.dev`. Set the real backend with
+  `wrangler secret put NEST_API_URL` — don't ship the placeholder `vars` value.
+
 ## 9. Internationalization (i18n) & text direction
 
 Three languages, **one way**: `next-intl` with a **cookie-based** locale (no
@@ -148,7 +159,7 @@ Three languages, **one way**: `next-intl` with a **cookie-based** locale (no
   Server Action (`src/lib/i18n/locale.ts`) sets the `rdb_lang` cookie, then
   `router.refresh()`. The page re-renders with new messages and `<html dir>`
   flips. First-visit language is auto-detected from `Accept-Language` in
-  `src/proxy.ts`, then remembered in the cookie.
+  `src/middleware.ts`, then remembered in the cookie.
     - **The switcher lives ONLY on the Settings page** — never in headers,
       layouts, or other screens.
 
@@ -171,7 +182,7 @@ Open items, in priority order:
     - `GET /auth/me` → `{ id, email, name, role, countryCode? }`
     - `POST /auth/logout` If the real NestJS endpoints differ, update
       `src/lib/api/server.ts`, `src/features/auth/actions.ts`,
-      `src/lib/auth/session.ts`, and `src/proxy.ts` to match.
+      `src/lib/auth/session.ts`, and `src/middleware.ts` to match.
 
 2. **Build real screens from XD.** Translate frames using the XD-pixel utilities
    (section 1). Each new domain area = `npm run gen` then wire pages under

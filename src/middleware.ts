@@ -82,7 +82,7 @@ async function tryRefresh(req: NextRequest) {
     }
 }
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
     const nonce = crypto.randomUUID().replace(/-/g, '');
 
     // Forward the nonce to the app so the document can tag inline scripts.

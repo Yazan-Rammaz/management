@@ -80,7 +80,7 @@ rdb/management/
 │  │  ├─ i18n/               # config.ts (locales+direction), request.ts, locale.ts (setLocale)
 │  │  ├─ env.ts              # validated server env
 │  │  └─ utils/cn.ts
-│  └─ proxy.ts               # edge: CSP + locale auto-detect + silent token refresh
+│  └─ middleware.ts          # edge: CSP + locale auto-detect + silent token refresh
 └─ AGENTS.md                 # the conventions (source of truth)
 ```
 
