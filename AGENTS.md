@@ -1,7 +1,12 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may
+all differ from your training data. Read the relevant guide in
+`node_modules/next/dist/docs/` before writing any code. Heed deprecation
+notices.
+
 <!-- END:nextjs-agent-rules -->
 
 # RDB Management — Conventions (the only way)
@@ -10,13 +15,14 @@ This project deliberately has **one way** to do each thing. Don't introduce a
 second pattern; extend the existing one. These conventions are also meant to be
 extracted into a reusable Claude Code skill.
 
-Stack: **Next.js 16 (App Router) · React 19 · Tailwind v4 · TypeScript ·
-Motion · OpenNext on Cloudflare**. Backend is **NestJS** (separate repo).
+Stack: **Next.js 16 (App Router) · React 19 · Tailwind v4 · TypeScript · Motion
+· OpenNext on Cloudflare**. Backend is **NestJS** (separate repo).
 
 ## 1. Responsive scaling — XD pixels that scale
 
 The root `font-size` is driven by the viewport (`src/app/globals.css`), so every
-`rem`-based value scales together → identical shape at every size ("the sample").
+`rem`-based value scales together → identical shape at every size ("the
+sample").
 
 `--spacing` is `0.0625rem`, so **1 Tailwind unit = 1 XD pixel**:
 
@@ -28,14 +34,16 @@ The root `font-size` is driven by the viewport (`src/app/globals.css`), so every
 | font 18    | `fz-18`      |
 | radius 12  | `rad-12`     |
 
-- **Never** write raw px in a className (`w-[300px]`) — it won't scale and lint bans it.
+- **Never** write raw px in a className (`w-[300px]`) — it won't scale and lint
+  bans it.
 - Three canvases (reference widths): **laptop 1366 / tablet 834 / mobile 430**.
-  Each scales 1:1 inside its band, caps at the reference (side whitespace above),
-  mobile **locks at 400px** (scrolls below).
+  Each scales 1:1 inside its band, caps at the reference (side whitespace
+  above), mobile **locks at 400px** (scrolls below).
 - Every page renders inside exactly one `<Screen variant="centered" | "bleed">`.
   `centered` (forms/text) gets a max-width column; `bleed` (dashboards) is full.
 
 **Project-wide design tokens (XD):**
+
 - Font: **Quicksand** (`--font-app-sans`, loaded in `layout.tsx`; Arabic falls
   back to system sans). Use `fz-*` for size; `font-normal/medium/semibold/bold`.
 - Colors: `bg-primary`/`text-primary` = `#3066CC` (action blue); `border-line` =
@@ -55,8 +63,10 @@ The root `font-size` is driven by the viewport (`src/app/globals.css`), so every
 
 ## 3. Auth & roles
 
-- httpOnly cookies (`rdb_at`/`rdb_rt`), set only in actions/route-handlers/proxy.
-- `src/proxy.ts` (Next 16 edge proxy) does silent refresh + security headers (CSP/HSTS).
+- httpOnly cookies (`rdb_at`/`rdb_rt`), set only in
+  actions/route-handlers/proxy.
+- `src/proxy.ts` (Next 16 edge proxy) does silent refresh + security headers
+  (CSP/HSTS).
 - The authoritative gate is `requireSession()` / `requireRole()` in protected
   layouts/pages — they call NestJS `/auth/me`. **Frontend RBAC is for rendering
   only; NestJS enforces every real rule.**
@@ -64,15 +74,18 @@ The root `font-size` is driven by the viewport (`src/app/globals.css`), so every
 
 ## 4. Validation
 
-- One zod schema per concern in `features/*/schema.ts`, shared by client + server.
-- API responses are parsed with the schema in `api.ts` so backend drift fails loud.
+- One zod schema per concern in `features/*/schema.ts`, shared by client +
+  server.
+- API responses are parsed with the schema in `api.ts` so backend drift fails
+  loud.
 
 ## 5. Icons & animation
 
 - Icons: `<Icon name="user" />` only. XD `.svg` files live in `/public/icons`.
   **No inline `<svg>` in pages.** `mask` mode recolors monochrome glyphs.
 - Animation: import presets from `src/components/motion/presets.ts`. Page
-  transitions via `template.tsx`; cards via `<AnimatedCard>`. Honor reduced-motion.
+  transitions via `template.tsx`; cards via `<AnimatedCard>`. Honor
+  reduced-motion.
 
 ## 6. Folder layering (lint-enforced)
 
@@ -101,13 +114,15 @@ Start a new feature with `npm run gen` — never hand-roll the structure.
 ## 8. Deploy
 
 Cloudflare **Workers Builds** is connected to the git repo → push to `main`
-auto-builds (`opennextjs-cloudflare build`) and deploys. Secrets (`NEST_API_URL`)
-are Cloudflare secrets; local dev uses `.dev.vars` (git-ignored).
+auto-builds (`opennextjs-cloudflare build`) and deploys. Secrets
+(`NEST_API_URL`) are Cloudflare secrets; local dev uses `.dev.vars`
+(git-ignored).
 
 ## 9. Internationalization (i18n) & text direction
 
 Three languages, **one way**: `next-intl` with a **cookie-based** locale (no
-`/en` URL prefix). Supported locales live in **one place**: `src/lib/i18n/config.ts`.
+`/en` URL prefix). Supported locales live in **one place**:
+`src/lib/i18n/config.ts`.
 
 - **Languages:** `en` (default), `ar`, `tr`. To add one: add the code to
   `locales` in `config.ts` **and** add `messages/<code>.json`. Nothing else.
@@ -117,31 +132,31 @@ Three languages, **one way**: `next-intl` with a **cookie-based** locale (no
   on language in a component.
 - **Author direction-agnostic UI.** Use **logical** Tailwind utilities so
   layouts mirror themselves:
-  - spacing/position: `ps-`/`pe-`, `ms-`/`me-`, `start-`/`end-` — never
-    `pl/pr`, `ml/mr`, `left/right`.
-  - alignment: `text-start`/`text-end` (not `text-left/right`); for flex rows,
-    `justify-start`/`justify-end` already follow `dir`.
-  - prefer `gap-*` over directional margins between siblings.
-  - (`px-*`/`mx-*` are symmetric, so they're fine.)
+    - spacing/position: `ps-`/`pe-`, `ms-`/`me-`, `start-`/`end-` — never
+      `pl/pr`, `ml/mr`, `left/right`.
+    - alignment: `text-start`/`text-end` (not `text-left/right`); for flex rows,
+      `justify-start`/`justify-end` already follow `dir`.
+    - prefer `gap-*` over directional margins between siblings.
+    - (`px-*`/`mx-*` are symmetric, so they're fine.)
 - **No hardcoded UI strings.** Every user-facing string is a key in
   `messages/*.json`. `en.json` is the canonical key set (type-checked via
   `global.d.ts`); keep `ar.json`/`tr.json` structurally identical.
-  - Server Components / layouts: `const t = await getTranslations("ns")`.
-  - Client Components: `const t = useTranslations("ns")`.
-  - Interpolation/plurals use ICU: `t("dashboard.welcome", { name })`.
+    - Server Components / layouts: `const t = await getTranslations("ns")`.
+    - Client Components: `const t = useTranslations("ns")`.
+    - Interpolation/plurals use ICU: `t("dashboard.welcome", { name })`.
 - **Switching language:** `<LocaleSwitcher>` (`components/ui`) → `setLocale()`
   Server Action (`src/lib/i18n/locale.ts`) sets the `rdb_lang` cookie, then
   `router.refresh()`. The page re-renders with new messages and `<html dir>`
   flips. First-visit language is auto-detected from `Accept-Language` in
   `src/proxy.ts`, then remembered in the cookie.
-  - **The switcher lives ONLY on the Settings page** — never in headers,
-    layouts, or other screens.
+    - **The switcher lives ONLY on the Settings page** — never in headers,
+      layouts, or other screens.
 
 ## 10. Session pickup — where we left off (as of 2026-06-17)
 
 The scaffold is complete and verified: `tsc`, `eslint`, `vitest` (7 tests) and
 `next build` all pass. Initial commit is on `main`. Remote `origin` is set to
-`https://github.com/Yazan-Rammaz/managament.git` but **nothing is pushed yet**
+`https://github.com/Yazan-Rammaz/management.git` but **nothing is pushed yet**
 (by the owner's request).
 
 **i18n is wired** (see §9): `next-intl`, cookie-based `en`/`ar`/`tr`, auto
@@ -151,13 +166,12 @@ must follow §9 — no hardcoded strings, logical Tailwind utilities only.
 Open items, in priority order:
 
 1. **Confirm/align the NestJS auth contract.** The BFF currently assumes:
-   - `POST /auth/login`, `POST /auth/register`, `POST /auth/refresh`
-     → respond `{ accessToken, refreshToken, accessMaxAge, refreshMaxAge }`
-   - `GET /auth/me` → `{ id, email, name, role, countryCode? }`
-   - `POST /auth/logout`
-   If the real NestJS endpoints differ, update `src/lib/api/server.ts`,
-   `src/features/auth/actions.ts`, `src/lib/auth/session.ts`, and `src/proxy.ts`
-   to match.
+    - `POST /auth/login`, `POST /auth/register`, `POST /auth/refresh` → respond
+      `{ accessToken, refreshToken, accessMaxAge, refreshMaxAge }`
+    - `GET /auth/me` → `{ id, email, name, role, countryCode? }`
+    - `POST /auth/logout` If the real NestJS endpoints differ, update
+      `src/lib/api/server.ts`, `src/features/auth/actions.ts`,
+      `src/lib/auth/session.ts`, and `src/proxy.ts` to match.
 
 2. **Build real screens from XD.** Translate frames using the XD-pixel utilities
    (section 1). Each new domain area = `npm run gen` then wire pages under
@@ -166,5 +180,5 @@ Open items, in priority order:
 3. **Deploy wiring (owner action):** `git push -u origin main`, then connect the
    repo in Cloudflare → Workers Builds and set the `NEST_API_URL` secret.
 
-Roles so far: `super_admin`, `country_manager`, `agent` (`src/lib/auth/rbac.ts`).
-Extend there if more are needed.
+Roles so far: `super_admin`, `country_manager`, `agent`
+(`src/lib/auth/rbac.ts`). Extend there if more are needed.

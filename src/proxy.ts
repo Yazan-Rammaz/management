@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, matchLocale } from '@/lib/i18n/config';
 
 /**
- * Edge proxy (Next 16's renamed "middleware"). Two jobs, run on every request:
  *
  *  1. SECURITY HEADERS — strict CSP (per-request nonce), HSTS, framing/MIME
  *     hardening. `connect-src 'self'` is what forbids the browser from talking
@@ -83,7 +82,7 @@ async function tryRefresh(req: NextRequest) {
     }
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const nonce = crypto.randomUUID().replace(/-/g, '');
 
     // Forward the nonce to the app so the document can tag inline scripts.
