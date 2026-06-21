@@ -24,6 +24,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Mobile soft keyboard: OVERLAY it on top of the layout instead of resizing
+  // the viewport. The browser then never scrolls the page to chase the focused
+  // input — the layout stays put and the keyboard simply covers the reserved
+  // gray space at the bottom (auth screens own that space). Without this the
+  // default `resizes-visual` makes the page jump to the top on focus.
+  interactiveWidget: "overlays-content",
 };
 
 export default async function RootLayout({
