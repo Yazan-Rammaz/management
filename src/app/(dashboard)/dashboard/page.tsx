@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { requireSession } from "@/lib/auth/session";
+import { CityLog } from "./city-log";
 
 /**
  * PLACEHOLDER — build the real dashboard from XD here.
@@ -19,6 +20,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-20">
+      {/* Logs the city to the browser console (server reads cf, client logs it) */}
+      <CityLog city={cf?.city} country={cf?.country} />
       {/* TODO: build dashboard from XD */}
     </div>
   );
