@@ -7,12 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3006",
     trace: "on-first-retry",
   },
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:3000",
+    // `npm run dev` serves on 3006 (see package.json / AGENTS.md §10) — the
+    // wait URL must match the dev port or the webServer times out.
+    url: "http://localhost:3006",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
