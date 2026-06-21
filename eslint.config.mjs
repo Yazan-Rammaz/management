@@ -99,6 +99,7 @@ const eslintConfig = defineConfig([
     "build/**",
     ".open-next/**",
     ".wrangler/**",
+    ".history/**",
     "next-env.d.ts",
   ]),
 ]);
